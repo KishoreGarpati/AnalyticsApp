@@ -1,0 +1,58 @@
+<div id='container' style="height: 800px"></div>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="http://code.highcharts.com/highcharts.js"></script>
+<script src="http://code.highcharts.com/modules/exporting.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+	    var socket = io();
+
+        chart = new Highcharts.Chart({
+            chart: {
+		plotBackgroundColor: null,
+                plotBorderWidth: 1,
+                plotShadow: false
+            },
+	series: [
+        {
+	    type: 'pie',
+            center: [100, null],
+            size: 200,
+            innerSize: '70%',
+            data: []
+        }, {
+            type: 'pie',
+            center: [350, null],
+            size: 200,
+            innerSize: '70%',
+            data: []
+        }]
+ 
+	});
+        socket.on('message', function(message){
+                message = JSON.parse(message);
+   
+   	        var run_time = message.run_time;
+    		var run_data = [];
+    		Object.keys(run_time).forEach(function (key){
+                	data = {};
+	                data["name"] = key;
+        	        data["y"] = run_time[key]
+                	run_data.push(data);
+	            });
+            
+    		var efficiency = message.efficiency;
+	        var efficiency_data = [];
+	        Object.keys(efficiency).forEach(function (key){
+               	        data = {};
+               		data["name"] = key;
+                	data["y"] = efficiency[key]
+        	        efficiency_data.push(data);
+	            });
+    
+   		console.log(run_data);
+    		chart.series[0].setData(run_data);
+	        chart.series[1].setData(efficiency_data);
+   	   });
+        });
+</script>

@@ -1,0 +1,134 @@
+<div id="container1"></div>
+<div id="container2" style="width:48%;float:left;"></div>
+<div id="container3" style="width:48%;float:right;"></div>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="http://code.highcharts.com/highcharts.js"></script>
+<script src="http://code.highcharts.com/modules/exporting.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+	    var socket = io();
+	    var series;
+        Highcharts.setOptions({
+            global: {
+                useUTC: false
+            },
+            lang: {
+                thousandsSep: ','
+            }
+        });
+	
+
+	var chart1 = Highcharts.chart('container1', {
+         chart: {
+            type: 'bar'
+         },
+	 title: {
+		text:'Bilding Occupancy',
+		style: {
+                  fontWeight: 'bold',
+		  fontFamily: 'Trebuchet MS, Verdana, sans-serif'
+                }
+	 },
+         series: [{
+            name: 'Occupancy',
+            data: []
+         }]
+        });
+
+        chart2 = new Highcharts.Chart({
+            chart: {
+	        renderTo: 'container2',
+                animation: Highcharts.svg, // don't animate in old IE
+            },
+	    title:{
+	        text:'HVAC Run time',
+		style: {
+                  fontWeight: 'bold',
+                  fontFamily: 'Trebuchet MS, Verdana, sans-serif'
+                }
+        	},
+            subTitle:{
+        	text:''
+    		},
+	    series: [
+        {
+	    type: 'pie',
+            //center: [screen.width/4, null],
+            size:200 ,
+            innerSize: '70%',
+            data: []
+        }
+        ]
+            
+        });
+
+
+	chart3 = new Highcharts.Chart({
+            chart: {
+                renderTo: 'container3',
+                animation: Highcharts.svg, // don't animate in old IE
+            },
+            title:{
+                text:'Energy efficient building',
+		style: {
+                  fontWeight: 'bold',
+                  fontFamily: 'Trebuchet MS, Verdana, sans-serif'
+                }
+                },
+            subTitle:{
+                text:''
+                },
+            series: [
+         {
+            type: 'pie',
+            //center: [3*screen.width/4, null],
+            size: 200,
+            innerSize: '70%',
+            data: []
+        }]
+            
+        });
+
+
+
+        socket.on('message', function(message){
+            message = JSON.parse(message);
+    var occupancy = message.occupancy; 
+    console.log(occupancy);
+    var cat = [];
+    var val = [];
+    Object.keys(occupancy).forEach(function (key){
+      cat.push(key);
+      val.push(occupancy[key]);
+    });
+    chart1.xAxis[0].setCategories(cat);
+    chart1.series[0].setData(val);
+
+
+    var run_time = message.run_time;
+    var run_data = [];
+    Object.keys(run_time).forEach(function (key){
+                data = {};
+                data["name"] = key;
+                data["y"] = Number(run_time[key].toFixed(2));
+                run_data.push(data);
+            });
+            
+    var efficiency = message.efficiency;
+    var efficiency_data = [];
+    Object.keys(efficiency).forEach(function (key){
+                data = {};
+                data["name"] = key;
+                data["y"] = Number(efficiency[key].toFixed(2));
+                efficiency_data.push(data);
+            });
+    
+    console.log(run_data);
+    		chart2.series[0].setData(run_data);
+         	chart3.series[0].setData(efficiency_data); 
+	    console.log(message.occupancy);
+	countdown(); 
+        });
+    });
+</script>

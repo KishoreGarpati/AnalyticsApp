@@ -1,0 +1,98 @@
+<div id='container' style="background:#dee0e2"></div>
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<script src="http://code.highcharts.com/highcharts.js"></script>
+<script src="http://code.highcharts.com/modules/exporting.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script type="text/javascript">
+    $(document).ready(function () {
+	    var socket = io();
+	    var series;
+        Highcharts.setOptions({
+            global: {
+                useUTC: false
+            },
+            lang: {
+                thousandsSep: ','
+            }
+        });
+
+        chart = new Highcharts.Chart({
+            chart: {
+		        renderTo: 'container',
+                type: 'bar',
+                animation: Highcharts.svg, // don't animate in old IE
+                marginRight: 10,
+
+            },
+            title: {
+                text: 'Most Occupant Building'
+            },
+            xAxis: {
+                title: {
+                    text: 'Building',
+                    style: {
+                        fontWeight: 'bold'
+                    }
+                }
+            },
+            yAxis: {
+                title: {
+                    text: 'Occupancy',
+                    style: {
+                        fontWeight: 'bold'
+                    }
+                }
+            },
+            tooltip: {
+                formatter: function () {
+                    return '<b>' + this.series.name + '</b><br/>' +
+                         this.x + '<br/>' + Highcharts.numberFormat(this.y, 0);
+                }
+            },
+	    plotOptions: {
+            bar: {
+                dataLabels: {
+                    enabled: true
+                }
+            }
+            },
+            legend: {
+                enabled: true
+            },
+            exporting: {
+                enabled: true
+            },
+            series: [{
+            name: 'Occupancy',
+            data: []
+	}]         
+        });
+        socket.on('message', function(message){
+            message = JSON.parse(message);
+            
+	    console.log(message.occupancy) 
+	    var cat = [];
+            var val = [];
+            Object.keys(message.occupancy).forEach(function (key){
+                cat.push(key);
+                val.push(message.occupancy[key]);
+                console.log(message.occupancy[key]);
+            });
+            chart.xAxis[0].setCategories(cat);
+            chart.series[0].setData(val); 
+	   
+	    console.log(message.efficiency)
+	    console.log(message.run_time)
+	    //console.log(message);
+	    //var cat = [];
+	    //var val = [];
+	    //Object.keys(message).forEach(function (key){
+	        //cat.push(key);
+		//val.push(message[key]);
+		//console.log(message[key]);
+	    // });
+	    //chart.xAxis[0].setCategories(cat);
+	    //chart.series[0].setData(val);
+        });
+    });
+</script>

@@ -1,0 +1,8 @@
+configparser==3.3.0.post2
+kafka-python==0.9.4
+nltk==3.2.2
+oauthlib==1.0.3
+requests==2.8.1
+requests-oauthlib==0.5.0
+six==1.10.0
+tweepy==3.3.0
